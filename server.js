@@ -17,12 +17,12 @@ let requestCount = 0;
 
 const logUsageSummary = (response, tokensUsed, estimatedCost) => {
   console.log('\n=== Token Usage Summary ===');
-  console.log(`Request #: ${++requestCount}`);
-  console.log(`Input tokens: ${response.data.usage.prompt_tokens}`);
-  console.log(`Output tokens: ${response.data.usage.completion_tokens}`);
-  console.log(`Total tokens: ${tokensUsed}`);
-  console.log(`This request cost: $${estimatedCost.toFixed(4)}`);
-  console.log(`Running total: $${((totalTokensUsed / 1000) * 0.09).toFixed(4)}`);
+  console.log(Request #: ${++requestCount});
+  console.log(Input tokens: ${response.data.usage.prompt_tokens});
+  console.log(Output tokens: ${response.data.usage.completion_tokens});
+  console.log(Total tokens: ${tokensUsed});
+  console.log(This request cost: $${estimatedCost.toFixed(4)});
+  console.log(Running total: $${((totalTokensUsed / 1000) * 0.09).toFixed(4)});
   console.log('---------------------------\n');
 };
 
@@ -59,11 +59,11 @@ app.post('/api/chat', async (req, res) => {
 
 2. Code Examples\n
 
-\`\`\`python
+\\\`python
 # Each example starts on a new line
 def example():
     pass
-\`\`\`\n
+\\\`\n
 
 3. Best Practices\n
 
@@ -93,7 +93,7 @@ Formatting Rules:
       },
       {
         headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY.trim()}`,
+          'Authorization': Bearer ${process.env.OPENAI_API_KEY.trim()},
           'Content-Type': 'application/json'
         }
       }
@@ -135,6 +135,6 @@ Formatting Rules:
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log('\n=== Server Started ===');
-  console.log(`Listening on port ${PORT}`);
-  console.log(`Using model: ${process.env.MODEL_NAME}`);
+  console.log(Listening on port ${PORT});
+  console.log(Using model: ${process.env.MODEL_NAME});
 });
