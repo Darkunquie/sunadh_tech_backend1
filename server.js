@@ -4,27 +4,34 @@ const cors = require('cors');
 const axios = require('axios');
 
 const app = express();
-app.use(cors());
+
+// CORS setup
+app.use(cors({
+  origin: '*', // You can restrict this to your frontend domain if needed
+}));
 app.use(express.json());
 
-// Add token tracking with better logging
+// Token tracking
 let totalTokensUsed = 0;
 let requestCount = 0;
 
 const logUsageSummary = (response, tokensUsed, estimatedCost) => {
   console.log('\n=== Token Usage Summary ===');
-  console.log('-------------------------');
   console.log(`Request #: ${++requestCount}`);
   console.log(`Input tokens: ${response.data.usage.prompt_tokens}`);
   console.log(`Output tokens: ${response.data.usage.completion_tokens}`);
   console.log(`Total tokens: ${tokensUsed}`);
-  console.log('\n=== Cost Summary ===');
-  console.log('-------------------');
-  console.log(`This request: $${estimatedCost.toFixed(4)}`);
+  console.log(`This request cost: $${estimatedCost.toFixed(4)}`);
   console.log(`Running total: $${((totalTokensUsed / 1000) * 0.09).toFixed(4)}`);
-  console.log('-------------------------\n');
+  console.log('---------------------------\n');
 };
 
+// ✅ Default route to prevent 404
+app.get('/', (req, res) => {
+  res.send('🟢 Backend is running! Use POST /api/chat to interact.');
+});
+
+// ✅ Main Chat Endpoint
 app.post('/api/chat', async (req, res) => {
   try {
     const response = await axios.post(
@@ -92,20 +99,15 @@ Formatting Rules:
       }
     );
 
-    // Track and log usage
     const tokensUsed = response.data.usage.total_tokens;
     totalTokensUsed += tokensUsed;
     const estimatedCost = (tokensUsed / 1000) * 0.09;
     logUsageSummary(response, tokensUsed, estimatedCost);
 
-    // Extract plain content from OpenAI response
     const rawContent = response.data.choices[0].message.content;
-
-    // Replace newline characters with <br> for HTML rendering
     const htmlFormattedContent = rawContent.replace(/\n/g, "<br>");
 
-    // Send response with token info and HTML content
-    const formattedResponse = {
+    res.json({
       ...response.data,
       tokenInfo: {
         inputTokens: response.data.usage.prompt_tokens,
@@ -114,14 +116,11 @@ Formatting Rules:
         estimatedCost: estimatedCost,
         requestNumber: requestCount
       },
-      formattedHtml: htmlFormattedContent  // <-- This can be used in frontend
-    };
-
-    res.json(formattedResponse);
+      formattedHtml: htmlFormattedContent
+    });
 
   } catch (error) {
     console.error('\n=== API Error ===');
-    console.error('----------------');
     console.error('Status:', error.response?.status);
     console.error('Message:', error.response?.data?.error?.message);
     console.error('----------------\n');
@@ -132,11 +131,10 @@ Formatting Rules:
   }
 });
 
-const PORT = 3001;
+// Start server
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log('\n=== Server Started ===');
-  console.log('-------------------');
-  console.log(`Port: ${PORT}`);
-  console.log(`Model: ${process.env.MODEL_NAME}`);
-  console.log('-------------------\n');
+  console.log(`Listening on port ${PORT}`);
+  console.log(`Using model: ${process.env.MODEL_NAME}`);
 });
